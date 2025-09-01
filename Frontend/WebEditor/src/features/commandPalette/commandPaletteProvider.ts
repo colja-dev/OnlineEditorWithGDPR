@@ -13,6 +13,7 @@ import { LoadDFDandDDAction } from "../serialize/loadDFDandDD";
 import { LoadPalladioAction } from "../serialize/loadPalladio";
 import { SaveImageAction } from "../serialize/image";
 import { SettingsManager } from "../settingsMenu/SettingsManager";
+import { LoadGDPRAction } from "../serialize/loadGDPR";
 
 /**
  * Provides possible actions for the command palette.
@@ -32,6 +33,7 @@ export class ServerCommandPaletteActionProvider implements ICommandPaletteAction
                     new LabeledAction("Load diagram from JSON", [LoadDiagramAction.create(), commitAction], "json"),
                     new LabeledAction("Load DFD and DD", [LoadDFDandDDAction.create(), commitAction], "coffee"),
                     new LabeledAction("Load Palladio", [LoadPalladioAction.create(), commitAction], "fa-puzzle-piece"),
+                    new LabeledAction("Load GDPR", [LoadGDPRAction.create(), commitAction], "fa-puzzle-piece"),
                 ],
                 "go-to-file",
             ),

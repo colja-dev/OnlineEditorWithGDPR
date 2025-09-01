@@ -3,6 +3,7 @@ import { injectable } from "inversify";
 export interface Constraint {
     name: string;
     constraint: string;
+    explanation?: string;
 }
 
 @injectable()
@@ -10,6 +11,7 @@ export class ConstraintRegistry {
     private constraints: Constraint[] = [];
     private updateCallbacks: (() => void)[] = [];
     private selectedConstraints: string[] = this.constraints.map((c) => c.name);
+    private explanationMap: Map<string, string> = new Map<string, string>();
 
     public setConstraints(constraints: string[]): void {
         this.constraints = this.splitIntoConstraintTexts(constraints).map((c) => this.mapToConstraint(c));
@@ -19,7 +21,13 @@ export class ConstraintRegistry {
         this.constraints = constraints.map((c) => ({
             name: c.name,
             constraint: c.constraint,
+            explanation: c.explanation,
         }));
+        for (const c of this.constraints) {
+            if (c.explanation) {
+                this.explanationMap.set(c.name, c.explanation);
+            }
+        }
         this.constraintListChanged();
     }
 
@@ -38,6 +46,11 @@ export class ConstraintRegistry {
 
     public constraintListChanged(): void {
         this.updateCallbacks.forEach((cb) => cb());
+        this.constraints = this.constraints.map((c) => ({
+            name: c.name,
+            constraint: c.constraint,
+            explanation: c.explanation ?? this.explanationMap.get(c.name),
+        }));
     }
 
     public onUpdate(callback: () => void): void {

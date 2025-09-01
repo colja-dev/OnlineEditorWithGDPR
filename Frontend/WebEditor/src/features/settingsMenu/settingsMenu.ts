@@ -77,6 +77,12 @@ export class SettingsUI extends AbstractUIExtension {
                     <input type="checkbox" id="setting-read-only">
                     <span class="slider round"></span>
                   </label>
+
+                  <label for="setting-read-only">Enable Legal Comments</label>
+                  <label class="switch">
+                    <input type="checkbox" id="gdpr">
+                    <span class="slider round"></span>
+                  </label>
                 </div>
             </div>
         `;
@@ -116,6 +122,9 @@ export class SettingsUI extends AbstractUIExtension {
         readOnlyCheckbox.addEventListener("change", () => {
             this.dispatcher.dispatch(ChangeEditorModeAction.create(readOnlyCheckbox.checked ? "view" : "edit"));
         });
+
+        const gdprCheckbox = containerElement.querySelector("#gdpr") as HTMLInputElement;
+        this.settings.bindGDPRCheckbox(gdprCheckbox);
 
         const labelModeSelector = containerElement.querySelector("#setting-mode-option") as HTMLSelectElement;
         this.settings.bindLabelModeSelector(labelModeSelector);

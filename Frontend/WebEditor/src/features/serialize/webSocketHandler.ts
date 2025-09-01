@@ -1,7 +1,7 @@
 import { getModelFileName, logger, setModelSource, loadingIndicator } from "../../index";
 import { SaveDFDandDD } from "./saveDFDandDD";
 
-const webSocketAdress = `wss://websocket.dataflowanalysis.org/events/`;
+const webSocketAdress = `ws://localhost:3000/events/`;
 
 let ws: WebSocket;
 let wsId = 0;

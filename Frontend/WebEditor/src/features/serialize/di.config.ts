@@ -10,6 +10,8 @@ import { LoadDFDandDDCommand } from "./loadDFDandDD";
 import { SaveDFDandDDCommand } from "./saveDFDandDD";
 import { LoadPalladioCommand } from "./loadPalladio";
 import { SaveImageCommand } from "./image";
+import { LoadGDPRCommand } from "./loadGDPR";
+import { LoadGDPRConstraintsCommand } from "./gdprConstraints";
 
 export const serializeModule = new ContainerModule((bind, unbind, isBound, rebind) => {
     const context = { bind, unbind, isBound, rebind };
@@ -21,6 +23,8 @@ export const serializeModule = new ContainerModule((bind, unbind, isBound, rebin
     configureCommand(context, SaveDFDandDDCommand);
     configureCommand(context, LoadPalladioCommand);
     configureCommand(context, SaveImageCommand);
+    configureCommand(context, LoadGDPRCommand);
+    configureCommand(context, LoadGDPRConstraintsCommand);
 
     bind(TYPES.KeyListener).to(SerializeKeyListener).inSingletonScope();
     bind(TYPES.MouseListener).to(SerializeDropHandler).inSingletonScope();

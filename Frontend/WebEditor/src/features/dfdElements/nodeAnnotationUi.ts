@@ -16,6 +16,7 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
 import "./nodeAnnotationUi.css";
 import { SettingsManager } from "../settingsMenu/SettingsManager";
 import { Mode } from "../settingsMenu/annotationManager";
+import { ConstraintRegistry } from "../constraintMenu/constraintRegistry";
 
 export class DfdNodeAnnotationUIMouseListener extends MouseListener {
     private stillTimeout: number | undefined;
@@ -101,6 +102,7 @@ export class DfdNodeAnnotationUI extends AbstractUIExtension {
         @inject(DfdNodeAnnotationUIMouseListener)
         private readonly mouseListener: DfdNodeAnnotationUIMouseListener,
         @inject(SettingsManager) private settings: SettingsManager,
+        @inject(ConstraintRegistry) private readonly constraintRegistry: ConstraintRegistry,
     ) {
         super();
     }
@@ -189,6 +191,7 @@ export class DfdNodeAnnotationUI extends AbstractUIExtension {
         this.annotationParagraph.innerHTML = "";
 
         const mode = this.settings.getCurrentLabelMode();
+        const explanationsShown: string[] = [];
 
         node.annotations.forEach((a) => {
             if (
@@ -209,6 +212,21 @@ export class DfdNodeAnnotationUI extends AbstractUIExtension {
 
                 const textSpan = document.createElement("span");
                 textSpan.innerText = a.message;
+
+                if (a.message.startsWith("Constraint")) {
+                    const name = a.message.split(" ")[1];
+                    if (
+                        this.constraintRegistry.getConstraintList().filter((c) => c.name === name).length > 0 &&
+                        !explanationsShown.includes(name)
+                    ) {
+                        var constraint = this.constraintRegistry.getConstraintList().filter((c) => c.name === name)[0];
+                        if (constraint.explanation) {
+                            textSpan.innerText += "\n" + "\n" + name + ":\n" + constraint.explanation + "\n";
+                            explanationsShown.push(name);
+                        }
+                    }
+                }
+
                 line.appendChild(textSpan);
 
                 this.annotationParagraph.appendChild(line);

@@ -3,6 +3,7 @@ import { ActionDispatcher, TYPES } from "sprotty";
 import { ChangeEdgeLabelVisibilityAction, CompleteLayoutProcessAction, SimplifyNodeNamesAction } from "./actions";
 import { LayoutMethod } from "./LayoutMethod";
 import { Mode } from "./annotationManager";
+import { LoadGDPRConstraintsAction } from "../serialize/gdprConstraints";
 
 @injectable()
 export class SettingsManager {
@@ -13,6 +14,7 @@ export class SettingsManager {
     private _simplifyNodeNames = false;
     private _simplifyNodeNamesCheckbox?: HTMLInputElement;
     private _labelModeSelector?: HTMLSelectElement;
+    private _gdprCheckbox?: HTMLInputElement;
     private static readonly layoutMethodLocalStorageKey = "dfdwebeditor:settings";
 
     constructor(@inject(TYPES.IActionDispatcher) protected readonly dispatcher: ActionDispatcher) {
@@ -80,6 +82,14 @@ export class SettingsManager {
             this.dispatcher.dispatch(
                 SimplifyNodeNamesAction.create(this._simplifyNodeNamesCheckbox!.checked ? "hide" : "show"),
             );
+        });
+    }
+
+    public bindGDPRCheckbox(checkbox: HTMLInputElement) {
+        this._gdprCheckbox = checkbox;
+        this._gdprCheckbox.checked = false;
+        this._gdprCheckbox.addEventListener("change", () => {
+            this.dispatcher.dispatch(LoadGDPRConstraintsAction.create(this._gdprCheckbox!.checked));
         });
     }
 

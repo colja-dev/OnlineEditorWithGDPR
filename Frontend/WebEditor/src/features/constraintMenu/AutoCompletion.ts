@@ -13,11 +13,10 @@ export interface ValidationError {
     endColumn: number;
 }
 
-export interface Token {
+interface Token {
     text: string;
     line: number;
     column: number;
-    whiteSpaceAfter?: string;
 }
 
 export type WordCompletion = RequiredCompletionParts & Partial<monaco.languages.CompletionItem>;
@@ -97,29 +96,24 @@ export class NegatableWord implements AbstractWord {
 }
 
 export class AutoCompleteTree {
-    constructor(protected roots: AutoCompleteNode<AbstractWord>[]) {}
+    constructor(private roots: AutoCompleteNode[]) {}
 
-    protected tokenize(text: string[]): Token[] {
+    private tokenize(text: string[]): Token[] {
         if (!text || text.length == 0) {
             return [];
         }
 
         const tokens: Token[] = [];
         for (const [lineNumber, line] of text.entries()) {
-            const lineTokens = line.split(/(\s+)/);
+            const lineTokens = line.split(/\s+/).filter((t) => t.length > 0);
             let column = 0;
-            for (let i = 0; i < lineTokens.length; i += 2) {
-                const token = lineTokens[i];
-                if (token.length > 0) {
-                    tokens.push({
-                        text: token,
-                        line: lineNumber + 1,
-                        column: column + 1,
-                        whiteSpaceAfter: lineTokens[i + 1],
-                    });
-                }
-                column += token.length;
-                column += lineTokens[i + 1] ? lineTokens[i + 1].length : 0; // Add whitespace length
+            for (const token of lineTokens) {
+                column = line.indexOf(token, column);
+                tokens.push({
+                    text: token,
+                    line: lineNumber + 1,
+                    column: column + 1,
+                });
             }
         }
 
@@ -205,7 +199,6 @@ export class AutoCompleteTree {
                 column: lines[lines.length - 1].length + 1,
             });
         }
-
         let result: WordCompletion[] = [];
         if (tokens.length == 0) {
             for (const r of this.roots) {
@@ -221,16 +214,14 @@ export class AutoCompleteTree {
         nodes: AutoCompleteNode[],
         tokens: Token[],
         index: number,
-        cameFromFinal = false,
         skipStartCheck = false,
     ): WordCompletion[] {
         // check for new start
+
         if (!skipStartCheck && tokens[index].column == 1) {
             const matchesAnyRoot = this.roots.some((n) => n.word.verifyWord(tokens[index].text).length === 0);
             if (matchesAnyRoot) {
-                return this.completeNode(this.roots, tokens, index, cameFromFinal, true);
-            } else if (cameFromFinal || nodes.length == 0) {
-                return this.completeNode([...this.roots, ...nodes], tokens, index, cameFromFinal, true);
+                return this.completeNode(this.roots, tokens, index, true);
             }
         }
 
@@ -242,10 +233,10 @@ export class AutoCompleteTree {
             return result;
         }
         for (const n of nodes) {
-            if (n.word.verifyWord(tokens[index].text).length > 0) {
+            if (!n.word.verifyWord(tokens[index].text)) {
                 continue;
             }
-            result = result.concat(this.completeNode(n.children, tokens, index + 1, n.canBeFinal || false));
+            result = result.concat(this.completeNode(n.children, tokens, index + 1));
         }
         return result;
     }
@@ -292,9 +283,9 @@ function deduplicateErrors(errors: ValidationError[]): ValidationError[] {
     });
 }
 
-export interface AutoCompleteNode<W extends AbstractWord = AbstractWord> {
-    word: W;
-    children: AutoCompleteNode<W>[];
+export interface AutoCompleteNode {
+    word: AbstractWord;
+    children: AutoCompleteNode[];
     canBeFinal?: boolean;
     viewAsLeaf?: boolean;
 }
