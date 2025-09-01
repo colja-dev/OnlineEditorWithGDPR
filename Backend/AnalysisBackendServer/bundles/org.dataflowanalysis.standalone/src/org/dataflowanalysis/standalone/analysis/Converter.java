@@ -27,6 +27,9 @@ import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
 
+import mdpa.gdpr.dfdconverter.GDPR2DFD;
+import mdpa.gdpr.metamodel.GDPR.LegalAssessmentFacts;
+
 public class Converter {
     
     private static final Logger logger = Logger.getLogger(Converter.class);
@@ -100,6 +103,15 @@ public class Converter {
     	    }
     	}    	
     	return webEditorDfd;
+    }
+    
+    public static WebEditorDfd convertGDPRtoWebDFD (String lafFile) {
+        GDPR2DFD gdpr2dfd = new GDPR2DFD(lafFile);
+        gdpr2dfd.transform();
+        DataFlowDiagramAndDictionary dfd = new DataFlowDiagramAndDictionary(gdpr2dfd.getDataFlowDiagram(), gdpr2dfd.getDataDictionary());
+        DFD2WebConverter dfd2WebConverter = new DFD2WebConverter();
+        var model = dfd2WebConverter.convert(dfd);
+        return model.getModel();
     }
     
     /**

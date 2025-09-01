@@ -95,13 +95,15 @@ public class WebSocketServerHandler extends WebSocketAdapter
 				newJson = deserializeJsonAndAnnotate(message);	    				
 	    	}
 	    	else if (message.startsWith("Json2DFD:")) {
-	    		message = message.replaceFirst("Json2DFD:" + name + ":", "");   		
+	    		message = message.replaceFirst("Json2DFD:", "");   		
 				var webEditorDfd = deserializeJson(message);
 			    return name + ":" + Converter.convertToDFDandStringify(webEditorDfd, name);	
 	    	} 
 	    	else if (message.startsWith("DFD:")) {
 	    		newJson = safeLoadAndConvertDFDString(message);
-	    	} else {
+	    	} else if (message.startsWith("GDPR:")) {
+	    	    newJson = safeLoadAndConvertGDPRString(message);
+	    	}else {
 	    	    newJson = safeLoadAndConvertPCMString(message);
 	    	}
     	} catch (IllegalArgumentException e) {
@@ -157,6 +159,19 @@ public class WebSocketServerHandler extends WebSocketAdapter
 		    e.printStackTrace();
             throw new IllegalArgumentException("Invalid DFD Model");
 		}
+    }
+    
+    private WebEditorDfd safeLoadAndConvertGDPRString(String message) {
+        message = message.replaceFirst("GDPR:", "");
+        var name = message.split(":")[0];
+        message = message.replaceFirst(name + ":", "");
+        try {            
+            var laf = createAndWriteTempFile(name + ".gdpr", message);
+            return Converter.convertGDPRtoWebDFD(laf.getAbsolutePath());
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new IllegalArgumentException("Invalid GDPR Model");
+        }
     }
     
     private WebEditorDfd safeLoadAndConvertPCMString(String message) {
