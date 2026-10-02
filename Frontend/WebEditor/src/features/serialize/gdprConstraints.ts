@@ -21,7 +21,7 @@ export namespace LoadGDPRConstraintsAction {
 
 export class LoadGDPRConstraintsCommand extends Command {
     static readonly KIND = LoadGDPRConstraintsAction.KIND;
-    readonly constraintAdress = "https://model-based-data-protection-assessments.github.io/LegalComments/data.json";
+    readonly constraintAdress = "https://colja-dev.github.io/LegalComments/data.json";
     readonly dummyLabelAndType = {
         id: "99999",
         name: "DummyType0000",
